@@ -1,9 +1,10 @@
-frontend/
-modelo/redimension
-modelo/redimension_balanceado_1250_train_test
-modelo/redimension_balanceado_8000_train_test
+# Credenciales y secretos
+backend/credentials/
+frontend/dermascan-front/src/app/environments/
 
-modelo-final/archive
-modelo-final/redimension
-
-backend/credentials
+# Carpetas de datos generados y datasets pesados
+modelo/redimension/
+modelo/redimension_balanceado_1250_train_test/
+modelo/redimension_balanceado_8000_train_test/
+modelo-final/archive/
+modelo-final/redimension/

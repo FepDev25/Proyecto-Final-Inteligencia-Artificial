@@ -1,0 +1,248 @@
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-12">
+  <!-- Upload Section -->
+  <section *ngIf="showUploadSection" class="bg-white rounded-xl shadow-lg p-6 mb-12">
+    <div class="text-center mb-8">
+      <h3 class="text-2xl font-bold text-gray-800 mb-2">Analiza tu condición cutánea</h3>
+      <p class="text-gray-600">Sube una foto clara del área afectada para obtener un diagnóstico preliminar</p>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-8">
+      <!-- Upload Area -->
+      <div class="w-full md:w-1/2">
+        <div class="skin-upload-area rounded-xl p-8 text-center cursor-pointer flex flex-col items-center justify-center h-96"
+            (click)="openFilePicker()"
+            (dragover)="onDragOver($event)"
+            (drop)="onDrop($event)">
+          <i class="fas fa-cloud-upload-alt text-5xl text-blue-500 mb-4"></i>
+          <h4 class="text-xl font-semibold text-gray-700 mb-2">Arrastra y suelta tu foto aquí</h4>
+          <p class="text-gray-500 mb-4">o</p>
+          <button class="bg-blue-600 text-white font-medium py-2 px-6 rounded-full hover:bg-blue-700 transition"
+                  (click)="openFilePicker()">
+            Seleccionar archivo
+          </button>
+          <p class="text-gray-500 text-sm mt-4">Formatos soportados: JPG, PNG (Máx. 5MB)</p>
+          <input type="file" #skinImageInput accept="image/*" class="hidden" (change)="onFileSelected($event)">
+        </div>
+
+        <div class="mt-6">
+          <h4 class="font-medium text-gray-700 mb-3">Consejos para una mejor foto:</h4>
+          <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+            <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> Buena iluminación</li>
+            <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> Enfoque claro</li>
+            <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> Área afectada visible</li>
+            <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> Fondo neutro</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Preview Area -->
+      <div class="w-full md:w-1/2">
+        <div #previewArea class="border rounded-xl p-4 h-96 flex items-center justify-center bg-gray-50" [class.hidden]="!showAnalysisOptions">
+          <img #imagePreview src="#" alt="Vista previa de la imagen" class="max-h-full max-w-full rounded-lg" [class.hidden]="!showAnalysisOptions">
+          <div #previewPlaceholder class="text-center text-gray-500" [class.hidden]="showAnalysisOptions">
+            <i class="fas fa-image text-4xl mb-3"></i>
+            <p>Vista previa aparecerá aquí</p>
+          </div>
+        </div>
+
+        <div class="mt-6" *ngIf="showAnalysisOptions">
+          <h4 class="font-medium text-gray-700 mb-3">Lo que incluye el análisis:</h4>
+          <div class="space-y-4">
+            <div>
+              <label class="flex items-center">
+                <span class="ml-2 text-gray-700">Diagnóstico de posibles condiciones</span>
+              </label>
+            </div>
+            <div>
+              <label class="flex items-center">
+                <span class="ml-2 text-gray-700">Explicación detallada con IA</span>
+              </label>
+            </div>
+          </div>
+
+          <button class="w-full bg-blue-600 text-white font-medium py-3 px-6 rounded-lg mt-6 hover:bg-blue-700 transition flex items-center justify-center"
+                  (click)="analyzeImage()">
+            <i class="fas fa-search mr-2"></i> Analizar imagen
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Loading Section -->
+  <section *ngIf="showLoadingSection" class="bg-white rounded-xl shadow-lg p-8 text-center">
+    <div class="max-w-md mx-auto">
+      <div class="w-20 h-20 mx-auto mb-6">
+        <i class="fas fa-spinner fa-spin text-5xl text-blue-500"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-4">Analizando tu imagen</h3>
+      <p class="text-gray-600 mb-6">
+        Nuestra IA está examinando tu foto para identificar posibles condiciones cutáneas. Esto puede tomar unos segundos.
+      </p>
+
+      <div class="progress-bar mb-6">
+        <div #progressFill class="progress-fill" style="width: 0%"></div>
+      </div>
+
+      <div class="bg-blue-50 rounded-lg p-4 text-left">
+        <div class="flex items-start">
+          <div class="flex-shrink-0 pt-1">
+            <i class="fas fa-lightbulb text-blue-500"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-blue-700">
+              Mientras esperas: ¿Sabías que nuestro sistema ha analizado más de 1 millón de imágenes de piel con un 92% de precisión?
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
+
+
+  <!-- Results Section -->
+  <section *ngIf="showResultsSection">
+    <div class="flex justify-between items-center mb-8">
+      <h3 class="text-2xl font-bold text-gray-800">Resultados del análisis</h3>
+      <button class="text-blue-600 hover:text-blue-800 flex items-center" (click)="reset()">
+        <i class="fas fa-redo mr-2"></i> Analizar otra imagen
+      </button>
+    </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <!-- Primarjy Diagnosis -->
+          <div class="result-card bg-white rounded-xl shadow-md p-6 col-span-1 lg:col-span-2">
+              <div class="flex items-center mb-4">
+                  <div class="bg-blue-100 p-3 rounded-full mr-4">
+                      <i class="fas fa-diagnosis text-blue-600 text-xl"></i>
+                  </div>
+                  <h4 class="text-xl font-semibold text-gray-800">Diagnóstico principal</h4>
+              </div>
+
+              <div class="mb-6">
+                  <div class="flex justify-between items-center mb-2">
+                      <span class="font-medium text-gray-700">{{ diagnosticoPrincipal }}</span>
+                      <span class="font-bold text-blue-600">{{ probabilidadPrincipal }}% de coincidencia</span>
+                  </div>
+                  <div class="progress-bar">
+                      <div class="progress-fill" style="width: 87%"></div>
+                  </div>
+              </div>
+
+              <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <p class="text-blue-800"><span class="font-semibold">Resumen:</span> {{ resumenPrincipal }}</p>
+              </div>
+
+              <div class="flex flex-wrap gap-2 items-center">
+                  <span class="font-medium text-gray-700">Síntomas:</span>
+
+                  <span *ngFor="let sintoma of sintomas" class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                      {{ sintoma }}
+                  </span>
+              </div>
+
+
+                <ng-template #noSintomas>
+                    <span class="text-gray-500 text-sm">No se detectaron síntomas específicos.</span>
+                </ng-template>
+
+
+          </div>
+
+          <!-- Image Preview -->
+        <div class="result-card bg-white rounded-xl shadow-md p-6 flex items-center justify-center">
+            <div class="text-center">
+                <div class="mb-4 h-48 flex items-center justify-center">
+                    <img [src]="previewImageUrl" alt="Área afectada" class="max-h-full max-w-full rounded-lg">
+                </div>
+                <a [href]="previewImageUrl" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm flex items-center justify-center mx-auto">
+                    <i class="fas fa-expand mr-2"></i> Ver en tamaño completo
+                </a>
+            </div>
+        </div>
+
+      </div>
+
+      <!-- Other Possible Conditions -->
+      <div class="result-card bg-white rounded-xl shadow-md p-6 mb-8">
+          <div class="flex items-center mb-6">
+              <div class="bg-purple-100 p-3 rounded-full mr-4">
+                  <i class="fas fa-list-alt text-purple-600 text-xl"></i>
+              </div>
+              <h4 class="text-xl font-semibold text-gray-800">Otras posibles condiciones</h4>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div *ngFor="let cond of otrasCondiciones" class="border rounded-lg p-4 hover:border-blue-300 transition">
+                  <div class="flex justify-between items-start mb-2">
+                      <span class="font-medium text-gray-800">{{ cond.condicion }}</span>
+                      <span class="text-sm font-bold text-purple-600">
+                          {{ cond.probabilidad * 100 | number:'1.0-0' }}%
+                      </span>
+                  </div>
+                  <p class="text-sm text-gray-600">
+                      Clasificación interna: <strong>{{ cond.sigla }}</strong>. Esta probabilidad es aproximada según la IA.
+                  </p>
+              </div>
+          </div>
+      </div>
+
+
+      <!-- AI Explanation -->
+      <div class="result-card bg-white rounded-xl shadow-md p-6 mb-8">
+          <div class="flex items-center mb-6">
+              <div class="bg-green-100 p-3 rounded-full mr-4">
+                  <i class="fas fa-robot text-green-600 text-xl"></i>
+              </div>
+              <h4 class="text-xl font-semibold text-gray-800">Explicación detallada por IA</h4>
+          </div>
+
+          <div class="ai-explanation p-6 rounded-lg">
+              <p class="text-gray-800 mb-4">{{ textoExplicacion }}</p>
+
+              <div *ngIf="audioUrl" class="mt-4 bg-gray-100 p-4 rounded-lg shadow-inner">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-volume-up text-green-600 text-2xl"></i>
+                    <audio controls [src]="audioUrl" class="w-full">
+                        Tu navegador no soporta audio.
+                    </audio>
+                </div>
+            </div>
+
+          </div>
+      </div>
+
+
+      <!-- Next Steps -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="result-card bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition">
+              <div class="bg-blue-100 p-4 rounded-full inline-block mb-4">
+                  <i class="fas fa-user-md text-blue-600 text-2xl"></i>
+              </div>
+              <h5 class="font-semibold text-lg mb-2">Encuentra un dermatólogo</h5>
+              <p class="text-gray-600 text-sm mb-4">Conéctate con especialistas cerca de ti para una evaluación profesional.</p>
+                <button
+                  (click)="abrirDermatologos()"
+                  class="gradient-bg text-white px-8 py-3 rounded-full font-semibold hover:opacity-90 transition duration-300 shadow-lg"
+                >
+                  Buscar ahora <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+
+          </div>
+
+
+          <div class="result-card bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition">
+              <div class="bg-purple-100 p-4 rounded-full inline-block mb-4">
+                  <i class="fas fa-book-medical text-purple-600 text-2xl"></i>
+              </div>
+              <h5 class="font-semibold text-lg mb-2">Más información</h5>
+              <p class="text-gray-600 text-sm mb-4">Aprende más sobre {{ diagnosticoPrincipal }} y cómo manejarla.</p>
+              <button class="bg-purple-600 text-white py-2 px-6 rounded-full text-sm hover:bg-purple-700 transition">Leer artículos</button>
+          </div>
+      </div>
+
+
+  </section>
+</main>

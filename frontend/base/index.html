@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermaScan AI - Diagnóstico de enfermedades de la piel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 50%, #0085FF 100%);
+        }
+        .skin-upload-area {
+            border: 2px dashed #3B82F6;
+            transition: all 0.3s ease;
+        }
+        .skin-upload-area:hover {
+            border-color: #2563EB;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .result-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #E5E7EB;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #3B82F6, #60A5FA);
+            transition: width 0.5s ease;
+        }
+        .ai-explanation {
+            border-left: 4px solid #3B82F6;
+            background-color: #F8FAFC;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="gradient-bg text-white">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-stethoscope text-2xl"></i>
+                    <h1 class="text-2xl font-bold">DermaScan AI</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#" class="hover:text-blue-200 transition">Inicio</a>
+                    <a href="#" class="hover:text-blue-200 transition">Cómo funciona</a>
+                    <a href="#" class="hover:text-blue-200 transition">Enfermedades</a>
+                    <a href="#" class="hover:text-blue-200 transition">Contacto</a>
+                </nav>
+                <button class="md:hidden text-xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">Diagnóstico de enfermedades de la piel con IA</h2>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">Sube una foto de tu condición cutánea y recibe un análisis instantáneo con explicaciones detalladas de nuestro sistema de inteligencia artificial.</p>
+            <button id="startScanBtn" class="bg-white text-blue-600 font-bold py-3 px-8 rounded-full hover:bg-blue-50 transition transform hover:scale-105">
+                Comenzar diagnóstico <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <!-- Upload Section -->
+        <section id="uploadSection" class="bg-white rounded-xl shadow-lg p-6 mb-12">
+            <div class="text-center mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Analiza tu condición cutánea</h3>
+                <p class="text-gray-600">Sube una foto clara del área afectada para obtener un diagnóstico preliminar</p>
+            </div>
+            
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Upload Area -->
+                <div class="w-full md:w-1/2">
+                    <div id="uploadArea" class="skin-upload-area rounded-xl p-8 text-center cursor-pointer flex flex-col items-center justify-center h-96">
+                        <i class="fas fa-cloud-upload-alt text-5xl text-blue-500 mb-4"></i>
+                        <h4 class="text-xl font-semibold text-gray-700 mb-2">Arrastra y suelta tu foto aquí</h4>
+                        <p class="text-gray-500 mb-4">o</p>
+                        <button class="bg-blue-600 text-white font-medium py-2 px-6 rounded-full hover:bg-blue-700 transition">
+                            Seleccionar archivo
+                        </button>
+                        <p class="text-gray-500 text-sm mt-4">Formatos soportados: JPG, PNG (Máx. 5MB)</p>
+                        <input type="file" id="skinImageInput" accept="image/*" class="hidden">
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="font-medium text-gray-700 mb-3">Consejos para una mejor foto:</h4>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                            <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> Buena iluminación</li>
+                            <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> Enfoque claro</li>
+                            <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> Área afectada visible</li>
+                            <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> Fondo neutro</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Preview Area -->
+                <div class="w-full md:w-1/2">
+                    <div id="previewArea" class="border rounded-xl p-4 h-96 flex items-center justify-center bg-gray-50 hidden">
+                        <img id="imagePreview" src="#" alt="Vista previa de la imagen" class="max-h-full max-w-full rounded-lg hidden">
+                        <div id="previewPlaceholder" class="text-center text-gray-500">
+                            <i class="fas fa-image text-4xl mb-3"></i>
+                            <p>Vista previa aparecerá aquí</p>
+                        </div>
+                    </div>
+                    
+                    <div id="analysisOptions" class="mt-6 hidden">
+                        <h4 class="font-medium text-gray-700 mb-3">Opciones de análisis:</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <span class="ml-2 text-gray-700">Incluir diagnóstico de posibles condiciones</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <span class="ml-2 text-gray-700">Generar explicación detallada con IA</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
+                                    <span class="ml-2 text-gray-700">Comparar con casos similares</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button id="analyzeBtn" class="w-full bg-blue-600 text-white font-medium py-3 px-6 rounded-lg mt-6 hover:bg-blue-700 transition flex items-center justify-center">
+                            <i class="fas fa-search mr-2"></i> Analizar imagen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Loading Section -->
+        <section id="loadingSection" class="bg-white rounded-xl shadow-lg p-8 text-center hidden">
+            <div class="max-w-md mx-auto">
+                <div class="w-20 h-20 mx-auto mb-6">
+                    <i class="fas fa-spinner fa-spin text-5xl text-blue-500"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Analizando tu imagen</h3>
+                <p class="text-gray-600 mb-6">Nuestra IA está examinando tu foto para identificar posibles condiciones cutáneas. Esto puede tomar unos segundos.</p>
+                
+                <div class="progress-bar mb-6">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-4 text-left">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 pt-1">
+                            <i class="fas fa-lightbulb text-blue-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">Mientras esperas: ¿Sabías que nuestro sistema ha analizado más de 1 millón de imágenes de piel con un 92% de precisión?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Results Section -->
+        <section id="resultsSection" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-bold text-gray-800">Resultados del análisis</h3>
+                <button class="text-blue-600 hover:text-blue-800 flex items-center">
+                    <i class="fas fa-redo mr-2"></i> Analizar otra imagen
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Primary Diagnosis -->
+                <div class="result-card bg-white rounded-xl shadow-md p-6 col-span-1 lg:col-span-2">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-diagnosis text-blue-600 text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-800">Diagnóstico principal</h4>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-gray-700">Dermatitis atópica</span>
+                            <span class="font-bold text-blue-600">87% de coincidencia</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 87%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                        <p class="text-blue-800"><span class="font-semibold">Resumen:</span> La imagen muestra características consistentes con dermatitis atópica, incluyendo enrojecimiento, sequedad y posible descamación.</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Piel seca</span>
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Eritema</span>
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Prurito</span>
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Inflamación</span>
+                    </div>
+                </div>
+                
+                <!-- Image Preview -->
+                <div class="result-card bg-white rounded-xl shadow-md p-6 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="mb-4 h-48 flex items-center justify-center">
+                            <img id="resultImagePreview" src="https://images.unsplash.com/photo-1605497788044-5a32c7078486?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80" alt="Área afectada" class="max-h-full max-w-full rounded-lg">
+                        </div>
+                        <button class="text-blue-600 hover:text-blue-800 text-sm flex items-center justify-center mx-auto">
+                            <i class="fas fa-expand mr-2"></i> Ver en tamaño completo
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other Possible Conditions -->
+            <div class="result-card bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="flex items-center mb-6">
+                    <div class="bg-purple-100 p-3 rounded-full mr-4">
+                        <i class="fas fa-list-alt text-purple-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-800">Otras posibles condiciones</h4>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg p-4 hover:border-blue-300 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-medium text-gray-800">Dermatitis de contacto</span>
+                            <span class="text-sm font-bold text-purple-600">72%</span>
+                        </div>
+                        <p class="text-sm text-gray-600">Reacción alérgica o irritante a sustancias en contacto con la piel.</p>
+                    </div>
+                    
+                    <div class="border rounded-lg p-4 hover:border-blue-300 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-medium text-gray-800">Psoriasis</span>
+                            <span class="text-sm font-bold text-purple-600">65%</span>
+                        </div>
+                        <p class="text-sm text-gray-600">Enfermedad autoinmune que causa placas escamosas en la piel.</p>
+                    </div>
+                    
+                    <div class="border rounded-lg p-4 hover:border-blue-300 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-medium text-gray-800">Infección fúngica</span>
+                            <span class="text-sm font-bold text-purple-600">58%</span>
+                        </div>
+                        <p class="text-sm text-gray-600">Infección causada por hongos que puede causar descamación y picazón.</p>
+                    </div>
+                    
+                    <div class="border rounded-lg p-4 hover:border-blue-300 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-medium text-gray-800">Eczema numular</span>
+                            <span class="text-sm font-bold text-purple-600">42%</span>
+                        </div>
+                        <p class="text-sm text-gray-600">Lesiones en forma de moneda con picazón intensa.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI Explanation -->
+            <div class="result-card bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="flex items-center mb-6">
+                    <div class="bg-green-100 p-3 rounded-full mr-4">
+                        <i class="fas fa-robot text-green-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-800">Explicación detallada por IA</h4>
+                </div>
+                
+                <div class="ai-explanation p-6 rounded-lg">
+                    <div class="prose max-w-none">
+                        <h5 class="text-lg font-semibold mb-3">Análisis de Dermatitis Atópica</h5>
+                        <p>La imagen muestra características consistentes con dermatitis atópica, una condición inflamatoria crónica de la piel. Los hallazgos clave incluyen:</p>
+                        <ul class="list-disc pl-5 space-y-2 mt-3">
+                            <li><strong>Eritema:</strong> El enrojecimiento visible sugiere inflamación activa en el área.</li>
+                            <li><strong>Xerosis:</strong> La piel aparece seca y posiblemente escamosa, típico de la dermatitis atópica.</li>
+                            <li><strong>Liquenificación:</strong> En áreas crónicas, puede observarse engrosamiento de la piel.</li>
+                            <li><strong>Distribución:</strong> La ubicación en pliegues es característica de esta condición.</li>
+                        </ul>
+                        
+                        <h5 class="text-lg font-semibold mt-6 mb-3">Recomendaciones</h5>
+                        <ol class="list-decimal pl-5 space-y-2">
+                            <li><strong>Hidratación:</strong> Usar emolientes sin fragancia varias veces al día.</li>
+                            <li><strong>Corticoides tópicos:</strong> Aplicación de cremas con hidrocortisona al 1% para reducir la inflamación.</li>
+                            <li><strong>Evitar irritantes:</strong> Usar jabones suaves y evitar temperaturas extremas.</li>
+                            <li><strong>Consulta profesional:</strong> Visitar a un dermatólogo para confirmar diagnóstico y tratamiento.</li>
+                        </ol>
+                        
+                        <div class="mt-6 bg-yellow-50 p-4 rounded-lg">
+                            <p class="text-yellow-800"><strong>Nota importante:</strong> Este análisis es preliminar y no sustituye una evaluación médica profesional. Si los síntomas persisten o empeoran, busca atención médica.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Next Steps -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="result-card bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition">
+                    <div class="bg-blue-100 p-4 rounded-full inline-block mb-4">
+                        <i class="fas fa-user-md text-blue-600 text-2xl"></i>
+                    </div>
+                    <h5 class="font-semibold text-lg mb-2">Encuentra un dermatólogo</h5>
+                    <p class="text-gray-600 text-sm mb-4">Conéctate con especialistas cerca de ti para una evaluación profesional.</p>
+                    <button class="bg-blue-600 text-white py-2 px-6 rounded-full text-sm hover:bg-blue-700 transition">Buscar ahora</button>
+                </div>
+                
+                <div class="result-card bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition">
+                    <div class="bg-green-100 p-4 rounded-full inline-block mb-4">
+                        <i class="fas fa-prescription-bottle-alt text-green-600 text-2xl"></i>
+                    </div>
+                    <h5 class="font-semibold text-lg mb-2">Opciones de tratamiento</h5>
+                    <p class="text-gray-600 text-sm mb-4">Explora opciones de tratamiento recomendadas para tu condición.</p>
+                    <button class="bg-green-600 text-white py-2 px-6 rounded-full text-sm hover:bg-green-700 transition">Ver tratamientos</button>
+                </div>
+                
+                <div class="result-card bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition">
+                    <div class="bg-purple-100 p-4 rounded-full inline-block mb-4">
+                        <i class="fas fa-book-medical text-purple-600 text-2xl"></i>
+                    </div>
+                    <h5 class="font-semibold text-lg mb-2">Más información</h5>
+                    <p class="text-gray-600 text-sm mb-4">Aprende más sobre dermatitis atópica y cómo manejarla.</p>
+                    <button class="bg-purple-600 text-white py-2 px-6 rounded-full text-sm hover:bg-purple-700 transition">Leer artículos</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FAQ Section -->
+    <section class="bg-gray-50 py-12">
+        <div class="container mx-auto px-4">
+            <h3 class="text-2xl font-bold text-center text-gray-800 mb-8">Preguntas frecuentes</h3>
+            
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-question w-full text-left p-4 hover:bg-gray-50 transition flex justify-between items-center">
+                        <span class="font-medium">¿Qué tan preciso es el diagnóstico de DermaScan AI?</span>
+                        <i class="fas fa-chevron-down text-blue-500 transition-transform"></i>
+                    </button>
+                    <div class="faq-answer px-4 pb-4 hidden">
+                        <p class="text-gray-600">Nuestro sistema tiene una precisión promedio del 92% en comparación con diagnósticos dermatológicos profesionales, según estudios clínicos. Sin embargo, el diagnóstico final siempre debe ser confirmado por un médico especialista.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-question w-full text-left p-4 hover:bg-gray-50 transition flex justify-between items-center">
+                        <span class="font-medium">¿Qué tipo de imágenes debo subir para obtener los mejores resultados?</span>
+                        <i class="fas fa-chevron-down text-blue-500 transition-transform"></i>
+                    </button>
+                    <div class="faq-answer px-4 pb-4 hidden">
+                        <p class="text-gray-600">Para obtener los mejores resultados, sube fotos con buena iluminación, enfoque claro y que muestren claramente el área afectada. Evita fotos borrosas, con sombras fuertes o con maquillaje/cremas que puedan ocultar las características de la piel.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-question w-full text-left p-4 hover:bg-gray-50 transition flex justify-between items-center">
+                        <span class="font-medium">¿DermaScan AI puede diagnosticar cáncer de piel?</span>
+                        <i class="fas fa-chevron-down text-blue-500 transition-transform"></i>
+                    </button>
+                    <div class="faq-answer px-4 pb-4 hidden">
+                        <p class="text-gray-600">Nuestro sistema puede identificar características sospechosas que podrían indicar cáncer de piel, pero no debe usarse como herramienta de diagnóstico definitivo. Cualquier lesión sospechosa debe ser evaluada inmediatamente por un dermatólogo.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-question w-full text-left p-4 hover:bg-gray-50 transition flex justify-between items-center">
+                        <span class="font-medium">¿Cómo protege DermaScan AI mi privacidad y datos médicos?</span>
+                        <i class="fas fa-chevron-down text-blue-500 transition-transform"></i>
+                    </button>
+                    <div class="faq-answer px-4 pb-4 hidden">
+                        <p class="text-gray-600">Todas las imágenes y datos personales se almacenan de forma segura y encriptada. No compartimos información personal con terceros sin tu consentimiento explícito. Puedes eliminar tus datos en cualquier momento desde la configuración de tu cuenta.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-stethoscope mr-2"></i> DermaScan AI
+                    </h4>
+                    <p class="text-gray-400">Herramienta de diagnóstico dermatológico asistido por inteligencia artificial para una piel más saludable.</p>
+                </div>
+                
+                <div>
+                    <h5 class="font-semibold text-lg mb-4">Enlaces</h5>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Inicio</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Cómo funciona</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Enfermedades</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5 class="font-semibold text-lg mb-4">Legal</h5>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Términos de servicio</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Política de privacidad</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Aviso médico</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Cookies</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5 class="font-semibold text-lg mb-4">Contacto</h5>
+                    <ul class="space-y-2">
+                        <li class="flex items-center"><i class="fas fa-envelope mr-2 text-gray-400"></i> <a href="mailto:info@dermascan.ai" class="text-gray-400 hover:text-white transition">info@dermascan.ai</a></li>
+                        <li class="flex items-center"><i class="fas fa-phone mr-2 text-gray-400"></i> <span class="text-gray-400">+1 (555) 123-4567</span></li>
+                        <li class="flex items-center"><i class="fas fa-map-marker-alt mr-2 text-gray-400"></i> <span class="text-gray-400">San Francisco, CA</span></li>
+                    </ul>
+                    
+                    <div class="mt-4 flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2023 DermaScan AI. Todos los derechos reservados.</p>
+                <p class="mt-2 text-sm">Este servicio no reemplaza la consulta médica profesional. Consulte siempre a un dermatólogo certificado.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const uploadArea = document.getElementById('uploadArea');
+            const skinImageInput = document.getElementById('skinImageInput');
+            const previewArea = document.getElementById('previewArea');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewPlaceholder = document.getElementById('previewPlaceholder');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const uploadSection = document.getElementById('uploadSection');
+            const loadingSection = document.getElementById('loadingSection');
+            const resultsSection = document.getElementById('resultsSection');
+            const startScanBtn = document.getElementById('startScanBtn');
+            const progressFill = document.getElementById('progressFill');
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            
+            // Event Listeners
+            uploadArea.addEventListener('click', function() {
+                skinImageInput.click();
+            });
+            
+            skinImageInput.addEventListener('change', function(e) {
+                if (e.target.files.length) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        imagePreview.classList.remove('hidden');
+                        previewPlaceholder.classList.add('hidden');
+                        previewArea.classList.remove('hidden');
+                        
+                        // Show analysis options
+                        document.getElementById('analysisOptions').classList.remove('hidden');
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            analyzeBtn.addEventListener('click', function() {
+                uploadSection.classList.add('hidden');
+                loadingSection.classList.remove('hidden');
+                
+                // Simulate analysis progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    if (progress > 100) progress = 100;
+                    progressFill.style.width = `${progress}%`;
+                    
+                    if (progress === 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            loadingSection.classList.add('hidden');
+                            resultsSection.classList.remove('hidden');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }, 500);
+                    }
+                }, 300);
+            });
+            
+            startScanBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: uploadSection.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('border-blue-400', 'bg-blue-50');
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                this.classList.remove('border-blue-400', 'bg-blue-50');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('border-blue-400', 'bg-blue-50');
+                
+                if (e.dataTransfer.files.length) {
+                    skinImageInput.files = e.dataTransfer.files;
+                    const event = new Event('change');
+                    skinImageInput.dispatchEvent(event);
+                }
+            });
+            
+            // FAQ accordion
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const answer = this.nextElementSibling;
+                    const icon = this.querySelector('i');
+                    
+                    answer.classList.toggle('hidden');
+                    icon.classList.toggle('rotate-180');
+                });
+            });
+            
+            // Responsive navigation toggle (would need more implementation)
+        });
+    </script>
+<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=fepdev25/dermascan" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+</html>
