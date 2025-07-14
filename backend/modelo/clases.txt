@@ -1,0 +1,6 @@
+akne
+benign
+ekzama
+enfeksiyonel
+malign
+pigment

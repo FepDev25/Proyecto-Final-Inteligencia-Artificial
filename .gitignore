@@ -1,4 +1,3 @@
-backend/
 frontend/
 modelo/redimension
 modelo/redimension_balanceado_1250_train_test
@@ -6,3 +5,5 @@ modelo/redimension_balanceado_8000_train_test
 
 modelo-final/archive
 modelo-final/redimension
+
+backend/credentials
