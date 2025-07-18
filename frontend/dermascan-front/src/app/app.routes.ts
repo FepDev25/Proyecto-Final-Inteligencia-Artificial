@@ -6,6 +6,7 @@ import { EnfermeadesComponent } from "./components/enfermeades/enfermeades.compo
 import { InicioComponent } from "./components/inicio/inicio.component";
 import { ContactoComponent } from "./components/contacto/contacto.component";
 import { EncontrarDermatologoComponent } from "./components/encontrar-dermatologo/encontrar-dermatologo.component";
+import { HistorialComponent } from "./components/historial/historial.component";
 
 export const appRoutes: Routes = [
   { path: '', component: InicioComponent },
@@ -14,5 +15,6 @@ export const appRoutes: Routes = [
   { path: 'enfermedades', component: EnfermeadesComponent },
   { path: 'contacto', component: ContactoComponent },
   { path: 'encontrar-dermatologo', component: EncontrarDermatologoComponent},
+  { path: 'historial', component: HistorialComponent },
   { path: '**', redirectTo: 'inicio' }
 ];

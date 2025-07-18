@@ -1,3 +1,5 @@
+CREATE DATABASE dermascan OWNER felipep;
+
 -- Crear la tabla de enfermedades
 CREATE TABLE enfermedades (
     id_enfermedad SERIAL PRIMARY KEY,
