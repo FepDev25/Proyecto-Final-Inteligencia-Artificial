@@ -1,0 +1,43 @@
+<!-- Sección Enfermedades -->
+<section id="enfermedades" class="py-16 bg-gray-50">
+  <div class="container mx-auto px-4">
+      <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-gray-800 mb-4">Catálogo de afecciones dermatológicas</h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">Nuestro sistema puede analizar y diagnosticar {{ enfermedades.length }} afecciones dermatológicas diferentes para apoyo en su práctica clínica.</p>
+      </div>
+
+      <!-- Loading indicator -->
+      <div *ngIf="loading" class="text-center py-12">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <p class="mt-4 text-gray-600">Cargando catálogo de afecciones...</p>
+      </div>
+
+      <!-- Grid de enfermedades -->
+      <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div *ngFor="let enfermedad of enfermedades"
+               class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300 disease-card">
+              <div class="h-32 flex items-center justify-center" [ngClass]="getColorClass(enfermedad.nombre_enfermedad)">
+                  <i [ngClass]="getIconClass(enfermedad.nombre_enfermedad)"></i>
+              </div>
+              <div class="p-4">
+                  <h3 class="text-lg font-bold text-gray-800 mb-2 line-clamp-2">{{ enfermedad.nombre_enfermedad }}</h3>
+                  <p class="text-gray-600 text-sm mb-3 line-clamp-3" *ngIf="enfermedad.descripcion">
+                      {{ enfermedad.descripcion }}
+                  </p>
+                  <div class="flex items-center text-xs text-blue-500">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      <span>ID: {{ enfermedad.id_enfermedad }}</span>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Mensaje si no hay enfermedades -->
+      <div *ngIf="!loading && enfermedades.length === 0" class="text-center py-12">
+          <div class="text-gray-500">
+              <i class="fas fa-exclamation-circle text-4xl mb-4"></i>
+              <p class="text-xl">No se encontraron afecciones registradas en el catálogo.</p>
+          </div>
+      </div>
+  </div>
+</section>

@@ -1,0 +1,50 @@
+.disease-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.disease-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-clamp: 2;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-clamp: 3;
+}
+
+/* Estilos personalizados para diferentes tipos de enfermedades */
+.text-malignant {
+  color: #dc2626 !important;
+}
+
+.text-benign {
+  color: #16a34a !important;
+}
+
+.text-infectious {
+  color: #ea580c !important;
+}
+
+.bg-malignant {
+  background-color: #fef2f2 !important;
+}
+
+.bg-benign {
+  background-color: #f0fdf4 !important;
+}
+
+.bg-infectious {
+  background-color: #fff7ed !important;
+}

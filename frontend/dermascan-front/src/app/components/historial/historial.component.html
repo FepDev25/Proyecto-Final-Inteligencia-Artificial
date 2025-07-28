@@ -1,0 +1,42 @@
+<div class="container mx-auto p-4">
+  <h1 class="text-2xl font-bold mb-4">Historial de Análisis Clínicos</h1>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" (scroll)="onScroll()">
+    <div *ngFor="let item of historial; let i = index" class="bg-white rounded-lg shadow-md p-4">
+      <img
+        [src]="getImageUrl(item.imagen_url)"
+        alt="Imagen analizada del paciente"
+        class="w-full h-48 object-cover rounded-t-lg"
+        (error)="onImageError($event)"
+        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4='"
+      >
+      <div class="p-4">
+        <h2 class="text-xl font-semibold">{{ item.enfermedad?.nombre_enfermedad || 'Análisis en proceso' }}</h2>
+        <p class="text-gray-600">{{ item.fecha | date: 'medium' }}</p>
+
+        <!-- Resumen con funcionalidad Ver más/Ver menos -->
+        <div class="text-gray-800 mt-2">
+          <p *ngIf="!isExpanded(i)">{{ getTruncatedText(item.resumen) }}</p>
+          <p *ngIf="isExpanded(i)">{{ item.resumen }}</p>
+
+          <button
+            *ngIf="item.resumen && item.resumen.length > 150"
+            (click)="toggleExpanded(i)"
+            class="text-blue-600 hover:text-blue-800 text-sm font-medium mt-1 focus:outline-none">
+            {{ isExpanded(i) ? 'Ver menos' : 'Ver más' }}
+          </button>
+        </div>
+
+        <div *ngIf="item.porcentaje_coincidencia" class="mt-2">
+          <span class="font-bold">Nivel de confianza:</span>
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="bg-blue-600 h-2.5 rounded-full" [style.width.%]="item.porcentaje_coincidencia ? item.porcentaje_coincidencia * 100 : 0"></div>
+          </div>
+          <span class="text-sm">{{ (item.porcentaje_coincidencia ? item.porcentaje_coincidencia * 100 : 0) | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="loading" class="text-center mt-4">
+    <p>Cargando más análisis...</p>
+  </div>
+</div>

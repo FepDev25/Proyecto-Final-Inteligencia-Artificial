@@ -1,0 +1,11 @@
+# Credenciales y secretos
+backend/credentials/
+backend/.env.production
+backend/modelo/
+frontend/dermascan-front/src/app/environments/
+frontend/**/dist/
+# Carpetas de datos generados y datasets pesados
+modelo-final/train_test_val/
+frontend/dermascan-front/dist
+frontend/dermascan-front/node_modules
+frontend/dermascan-front/.vscode

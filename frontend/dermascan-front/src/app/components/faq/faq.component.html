@@ -1,0 +1,20 @@
+<section class="bg-gray-50 py-12">
+  <div class="container mx-auto px-4">
+    <h3 class="text-2xl font-bold text-center text-gray-800 mb-8">Preguntas frecuentes</h3>
+
+    <div class="max-w-3xl mx-auto space-y-4">
+      <div *ngFor="let faq of faqs; let i = index" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <button (click)="toggle(i)"
+                class="w-full text-left p-4 hover:bg-gray-50 transition flex justify-between items-center">
+          <span class="font-medium">{{ faq.pregunta }}</span>
+          <i class="fas fa-chevron-down text-blue-500 transition-transform"
+             [class.rotate-180]="faq.abierta"></i>
+        </button>
+
+        <div class="px-4 pb-4" *ngIf="faq.abierta">
+          <p class="text-gray-600">{{ faq.respuesta }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
